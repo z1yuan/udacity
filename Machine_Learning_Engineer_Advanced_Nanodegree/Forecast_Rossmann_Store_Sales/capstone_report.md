@@ -73,15 +73,16 @@ store.csv
 ### 2.2 探索性可视化
 
 图1直观的显示了店面的销售额和达到该销售额的店面数量。
-![7463e451ab41d4fcc1edd233e7d40740.png](en-resource://database/5033:1) 图1
+![alt info](./pics/pic1.png)图1
+
 图2取原始数据的histogram并调节bin和坐标范围。
-![bae859a60e5b126c149eaa8e1ade10c5.png](en-resource://database/5035:1) 图2
+![image](./pics/pic2.png) 图2
 取对数变换，变换后可以看到数据大体呈正态分布。
-![670a479d047f124a68dfa66a1fba9fb4.png](en-resource://database/5039:1) 图3
+![image](./pics/pic3.png) 图3
 图4揭示了sales和其他的特性的直观关联。从图中可知sales 和Customsers 及Promo有很强的相关性。我们可以理解为当店面促销时销售额是会提高的。
-![620d33011127ace6187185e2874c48f3.png](en-resource://database/5041:1)图4
+![image](./pics/pic4.png)图4
 图5揭示了sales与DayOfWeek，StoreType，Promo的关系。从图中可知店面类型b的销售额整体交其他种类的店面要高。周一的销售额比其他天数要略高。
-![f31a7100f14d71806237b3f51d5812cb.png](en-resource://database/5043:1)图5
+![image](./pics/pic5.png)图5
 
 
 
@@ -207,7 +208,7 @@ XGBoost最优参数为：
 |XGBoost    | 0.070007                | 0.087433|0.096514|
 
 将测试及结果上传至kaggle，结果见图
-![c1459767a22424ba44e5cf0f75e4872a.png](en-resource://database/5051:1)
+![image](./pics/pic6.png)
 
 由上图可知我们的最终得分是：0.11656，满足项目要求，也说明我们的模型达到了要求。
 
@@ -216,7 +217,7 @@ XGBoost最优参数为：
 
 ### 5.1 结果可视化
 通过建模及优化我们对Rossman的店面进行了成功的预测，下图画出了本项目中各个featue的重要性。
-![a2f22ea6379289146357518880f7e8f5.png](en-resource://database/5053:1)
+![image](./pics/pic7.png)
 从图中可知店面的销售额和竞争对手的因素是有很大关系的，另一个客观的因素是时间，可以看出顾客的采购也是有惯性和规律的。
 
 
