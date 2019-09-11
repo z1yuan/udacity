@@ -1,8 +1,8 @@
 # 机器学习纳米学位
 ##毕业项目
- Joe 优达学城 </br>
+ 优达学城 
  
-2019年09月03日
+2019年09月11日
 
 Yuan, Zhi
  
@@ -73,15 +73,15 @@ store.csv
 ### 2.2 探索性可视化
 
 图1直观的显示了店面的销售额和达到该销售额的店面数量。
-![7463e451ab41d4fcc1edd233e7d40740.png](en-resource://database/5033:0) 图1
+![7463e451ab41d4fcc1edd233e7d40740.png](en-resource://database/5033:1) 图1
 图2取原始数据的histogram并调节bin和坐标范围。
-![bae859a60e5b126c149eaa8e1ade10c5.png](en-resource://database/5035:0) 图2
+![bae859a60e5b126c149eaa8e1ade10c5.png](en-resource://database/5035:1) 图2
 取对数变换，变换后可以看到数据大体呈正态分布。
-![670a479d047f124a68dfa66a1fba9fb4.png](en-resource://database/5039:0) 图3
+![670a479d047f124a68dfa66a1fba9fb4.png](en-resource://database/5039:1) 图3
 图4揭示了sales和其他的特性的直观关联。从图中可知sales 和Customsers 及Promo有很强的相关性。我们可以理解为当店面促销时销售额是会提高的。
-![620d33011127ace6187185e2874c48f3.png](en-resource://database/5041:0)图4
+![620d33011127ace6187185e2874c48f3.png](en-resource://database/5041:1)图4
 图5揭示了sales与DayOfWeek，StoreType，Promo的关系。从图中可知店面类型b的销售额整体交其他种类的店面要高。周一的销售额比其他天数要略高。
-![f31a7100f14d71806237b3f51d5812cb.png](en-resource://database/5043:0)图5
+![f31a7100f14d71806237b3f51d5812cb.png](en-resource://database/5043:1)图5
 
 
 
@@ -162,60 +162,79 @@ $$Gain=\frac{1}{2}\left[\frac{G_{L}^{2}}{H_{L}+\lambda}+\frac{G_{R}^{2}}{H_{R}+\
 #### 3.1.3 数据重构
 1. 将Date分解成Year, Month, Day, WeekofYear
 2. 组合特征CompetitionOpenSinceYear, CompetitionOpenSinceMonth及date生成新的特征CompetitionOpen, 表示竞争对手的开业时长。
-3. 组合特征Promo2SinceYear, Promo2SinceWeek以及Date生成特征PromoOpen, 表示持续促销开始了多久。 
+3. 组合特征Promo2SinceYear, Promo2SinceWeek以及Date生成特征PromoOpen, 表示持续促销开始了多久。
+4. 组合特征PromoInterval和date生成新的特征IsPromoMonth来表示单签是否是促销月。这步非常重要，经历了大于20000次的training实验后发现没有这个步骤分数不会达到0.118以下。
 
 ### 3.2 执行过程
-TBD
+将经过预处理后的 train训练数据根据时间划分为训练数据以及交叉验证据，在这里取train中后两周的数据作为交叉验证集。使用XGBoost建立回归预测模型。
+XGBoost默认参数为：
+|参数         |值                     |
+| ---         | ---                   |
+|booster    |  gbtree                     |
+|objective	  |    objective                   |
+|eta |        0.3               |
+|max_depth |      6                |
+|min_child_weight|    1                  |
+|subsample         |  1                    |
+|colsample_bytree  |  1                    |
+|gamma             |  0                    |
+|lambda            |  1                    |
+|alpha             | 0                     |
+|random_state      |  23                   |
 
-### 3.3 完善
-在这一部分，你需要描述你对原有的算法和技术完善的过程。例如调整模型的参数以达到更好的结果的过程应该有所记录。你需要记录最初和最终的模型，以及过程中有代表性意义的结果。你需要考虑的问题：
-- _初始结果是否清晰记录了？_
-- _完善的过程是否清晰记录了，其中使用了什么技术？_
-- _完善过程中的结果以及最终结果是否清晰记录了？_
+### 3.3 优化
+我们的策略是从一开始我们使用XGBoost算法的默认参数，然后不断地调整优化参数
+来提高分数。我们通过调节模型的复杂度和增加随机性来防止过拟合，我们调节的参数有：eta, max_depth, gamma, min_child_weight, subsample, colsample_bytree, lambda以及alpha。我们利用xgb提供的API cv() 可以对上述部分参数进行甄选。
+经过反复运算，我们得到了最终得参数组
+XGBoost最优参数为：
+|参数         |值                     |
+| ---         | ---                   |
+|booster    |  gbtree                     |
+|objective	  |    objective                   |
+|eta |        0.08               |
+|max_depth |      10                |
+|min_child_weight|    20                  |
+|subsample         |  0.9                    |
+|colsample_bytree  |  0.6                    |
+|alpha             | 1                     |
+|random_state      |  23                   |
 
+## 4. 实验结果分析
+在我们得到最优参数解组以后我们用了3000轮去训练模型，此时在我们自己生成得验证集上可以得到得训练结果是：
 
-## 4. 结果
-_（大概 2-3 页）_
+|Model         | train-rmspe            |eval-rmspe |RMSPE|
+| ---         | ---                   | --- |  --|                 
+|XGBoost    | 0.070007                | 0.087433|0.096514|
 
-### 4.1 模型的评价与验证
-在这一部分，你需要对你得出的最终模型的各种技术质量进行详尽的评价。最终模型是怎么得出来的，为什么它会被选为最佳需要清晰地描述。你也需要对模型和结果可靠性作出验证分析，譬如对输入数据或环境的一些操控是否会对结果产生影响（敏感性分析sensitivity analysis）。一些需要考虑的问题：
-- _最终的模型是否合理，跟期待的结果是否一致？最后的各种参数是否合理？_
-- _模型是否对于这个问题是否足够稳健可靠？训练数据或输入的一些微小的改变是否会极大影响结果？（鲁棒性）_
-- _这个模型得出的结果是否可信？_
+将测试及结果上传至kaggle，结果见图
+![c1459767a22424ba44e5cf0f75e4872a.png](en-resource://database/5051:1)
 
-### 4.2 合理性分析
-在这个部分，你需要利用一些统计分析，把你的最终模型得到的结果与你的前面设定的基准模型进行对比。你也分析你的最终模型和结果是否确确实实解决了你在这个项目里设定的问题。你需要考虑：
-- _最终结果对比你的基准模型表现得更好还是有所逊色？_
-- _你是否详尽地分析和讨论了最终结果？_
-- _最终结果是不是确确实实解决了问题？_
+由上图可知我们的最终得分是：0.11656，满足项目要求，也说明我们的模型达到了要求。
 
 
 ## 5. 项目结论
-_（大概 1-2 页）_
 
 ### 5.1 结果可视化
-在这一部分，你需要用可视化的方式展示项目中需要强调的重要技术特性。至于什么形式，你可以自由把握，但需要表达出一个关于这个项目重要的结论和特点，并对此作出讨论。一些需要考虑的：
-- _你是否对一个与问题，数据集，输入数据，或结果相关的，重要的技术特性进行了可视化？_
-- _可视化结果是否详尽的分析讨论了？_
-- _绘图的坐标轴，标题，基准面是不是清晰定义了？_
+通过建模及优化我们对Rossman的店面进行了成功的预测，下图画出了本项目中各个featue的重要性。
+![a2f22ea6379289146357518880f7e8f5.png](en-resource://database/5053:1)
+从图中可知店面的销售额和竞争对手的因素是有很大关系的，另一个客观的因素是时间，可以看出顾客的采购也是有惯性和规律的。
 
 
 ### 5.2 对项目的思考
-在这一部分，你需要从头到尾总结一下整个问题的解决方案，讨论其中你认为有趣或困难的地方。从整体来反思一下整个项目，确保自己对整个流程是明确掌握的。需要考虑：
-- _你是否详尽总结了项目的整个流程？_
-- _项目里有哪些比较有意思的地方？_
-- _项目里有哪些比较困难的地方？_
-- _最终模型和结果是否符合你对这个问题的期望？它可以在通用的场景下解决这些类型的问题吗？_
+在项目中通过对一些特征的再造我们可以揭示更多的信息，从而极大的提高模型的准确性，这些在数据预处理重要详细考虑。在本项目中，我之前忽略了PromoInterval，这导致我无论怎样优化参数都不能把kaggle分数降到0.118已下，这可能也是udacity设立0.117这个指标的考量之一。这也再次印证了数据的预处理决定了模型结果的上限。
 
 
 ### 5.3 需要作出的改进
-在这一部分，你需要讨论你可以怎么样去完善你执行流程中的某一方面。例如考虑一下你的操作的方法是否可以进一步推广，泛化，有没有需要作出变更的地方。你并不需要确实作出这些改进，不过你应能够讨论这些改进可能对结果的影响，并与现有结果进行比较。一些需要考虑的问题：
-- _是否可以有算法和技术层面的进一步的完善？_
-- _是否有一些你了解到，但是你还没能够实践的算法和技术？_
-- _如果将你最终模型作为新的基准，你认为还能有更好的解决方案吗？_
+从给定的数据中进行更深入的挖掘，我们需要考虑的更多，从kaggle的结果来看，我们的模型和最优的模型还有不小的差距。参数调整方面我们的模型还比较粗线条，可以进行更加细致的调整。模型方面，我们也可以利用更多的方法方案例如mlxtend /8/。
 
 ### REF
 /1/ https://blog.csdn.net/yinyu19950811/article/details/81079192
 /2/ Tianqi Chen,Tong He. Higgs Boson Discovery with Boosted Trees[C]. JMLR: Workshop and Conference Proceedings, 2015 (42): 69-80. 
+/3/ https://www.kaggle.com/ananya77041/rossmann-store-sales/randomforestpython/code
+/4/ https://www.kaggle.com/danspace/rossmann-store-sales-xgboost/notebook
+/5/ https://www.kaggle.com/cast42/xgboost-in-python-with-rmspe-v2
+/6/ https://blog.csdn.net/han_xiaoyang/article/details/52665396
+/7/ https://xgboost.readthedocs.io/en/latest/parameter.html#parameters-for-linear-booster-booster-gblinear
+/8/ http://rasbt.github.io/mlxtend/user_guide/regressor/StackingCVRegressor/
 
 
